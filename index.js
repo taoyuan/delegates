@@ -1,9 +1,12 @@
-
 /**
  * Expose `Delegator`.
  */
 
-module.exports = Delegator;
+exports = module.exports = function (proto, target) {
+    return new Delegator(proto, target);
+};
+
+exports.Delegator = Delegator;
 
 /**
  * Initialize a delegator.
@@ -14,12 +17,12 @@ module.exports = Delegator;
  */
 
 function Delegator(proto, target) {
-  if (!(this instanceof Delegator)) return new Delegator(proto, target);
-  this.proto = proto;
-  this.target = target;
-  this.methods = [];
-  this.getters = [];
-  this.setters = [];
+    if (!(this instanceof Delegator)) return new Delegator(proto, target);
+    this.proto = proto;
+    this.target = target;
+    this.methods = [];
+    this.getters = [];
+    this.setters = [];
 }
 
 /**
@@ -30,16 +33,17 @@ function Delegator(proto, target) {
  * @api public
  */
 
-Delegator.prototype.method = function(name){
-  var proto = this.proto;
-  var target = this.target;
-  this.methods.push(name);
+Delegator.prototype.method = function (name) {
+    var proto = this.proto;
+    var target = this.target;
+    this.methods.push(name);
 
-  proto[name] = function(){
-    return this[target][name].apply(this[target], arguments);
-  };
+    proto[name] = function () {
+        if (!this[target]) return this;
+        return this[target][name].apply(this[target], arguments);
+    };
 
-  return this;
+    return this;
 };
 
 /**
@@ -50,8 +54,8 @@ Delegator.prototype.method = function(name){
  * @api public
  */
 
-Delegator.prototype.access = function(name){
-  return this.getter(name).setter(name);
+Delegator.prototype.access = function (name) {
+    return this.getter(name).setter(name);
 };
 
 /**
@@ -62,16 +66,17 @@ Delegator.prototype.access = function(name){
  * @api public
  */
 
-Delegator.prototype.getter = function(name){
-  var proto = this.proto;
-  var target = this.target;
-  this.getters.push(name);
+Delegator.prototype.getter = function (name) {
+    var proto = this.proto;
+    var target = this.target;
+    this.getters.push(name);
 
-  proto.__defineGetter__(name, function(){
-    return this[target][name];
-  });
+    proto.__defineGetter__(name, function () {
+        if (!this[target]) return undefined;
+        return this[target][name];
+    });
 
-  return this;
+    return this;
 };
 
 /**
@@ -82,14 +87,15 @@ Delegator.prototype.getter = function(name){
  * @api public
  */
 
-Delegator.prototype.setter = function(name){
-  var proto = this.proto;
-  var target = this.target;
-  this.setters.push(name);
+Delegator.prototype.setter = function (name) {
+    var proto = this.proto;
+    var target = this.target;
+    this.setters.push(name);
 
-  proto.__defineSetter__(name, function(val){
-    return this[target][name] = val;
-  });
+    proto.__defineSetter__(name, function (val) {
+        if (!this[target]) return this;
+        return this[target][name] = val;
+    });
 
-  return this;
+    return this;
 };

@@ -6,7 +6,7 @@
 ## Installation
 
 ```
-$ npm install delegates
+$ npm install taoyuan/delegates
 ```
 
 ## Example
