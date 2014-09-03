@@ -38,10 +38,15 @@ Delegator.prototype.method = function (name) {
     var target = this.target;
     this.methods.push(name);
 
-    proto[name] = function () {
-        if (!this[target]) return this;
-        return this[target][name].apply(this[target], arguments);
-    };
+    if (typeof target === 'object') {
+        proto[name] = function () {
+            return target[name].apply(this[target], arguments);
+        };
+    } else {
+        proto[name] = function () {
+            return this[target][name].apply(this[target], arguments);
+        };
+    }
 
     return this;
 };
@@ -71,10 +76,15 @@ Delegator.prototype.getter = function (name) {
     var target = this.target;
     this.getters.push(name);
 
-    proto.__defineGetter__(name, function () {
-        if (!this[target]) return undefined;
-        return this[target][name];
-    });
+    if (typeof target === 'object') {
+        proto.__defineGetter__(name, function () {
+            return target[name];
+        });
+    } else {
+        proto.__defineGetter__(name, function () {
+            return this[target][name];
+        });
+    }
 
     return this;
 };
@@ -92,10 +102,15 @@ Delegator.prototype.setter = function (name) {
     var target = this.target;
     this.setters.push(name);
 
-    proto.__defineSetter__(name, function (val) {
-        if (!this[target]) return this;
-        return this[target][name] = val;
-    });
+    if (typeof target === 'object') {
+        proto.__defineSetter__(name, function (val) {
+            return target[name] = val;
+        });
+    } else {
+        proto.__defineSetter__(name, function (val) {
+            return this[target][name] = val;
+        });
+    }
 
     return this;
 };
